@@ -4,6 +4,7 @@ namespace Illuminate\Foundation;
 
 use Exception;
 use Illuminate\Filesystem\Filesystem;
+use Symfony\Component\Yaml\Yaml;
 
 class PackageManifest
 {
@@ -154,6 +155,11 @@ class PackageManifest
      */
     protected function packagesToIgnore()
     {
+        // @yannoff: add support for composer.yaml beside standard composer.json files
+        if (is_file($this->basePath.'/composer.yaml')) {
+            return Yaml::parseFile($this->basePath.'/composer.yaml')['extra']['laravel']['dont-discover'] ?? [];
+        }
+
         if (! is_file($this->basePath.'/composer.json')) {
             return [];
         }
