@@ -25,6 +25,7 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\Yaml\Yaml;
 
 class Application extends Container implements ApplicationContract, CachesConfiguration, CachesRoutes, HttpKernelInterface
 {
@@ -1386,7 +1387,12 @@ class Application extends Container implements ApplicationContract, CachesConfig
             return $this->namespace;
         }
 
-        $composer = json_decode(file_get_contents($this->basePath('composer.json')), true);
+        // @yannoff: add support for composer.yaml beside standard composer.json files
+        if (file_exists($this->basePath('composer.yaml'))) {
+            $composer = Yaml::parseFile($this->basePath('composer.yaml'));
+        } else {
+            $composer = json_decode(file_get_contents($this->basePath('composer.json')), true);
+        }
 
         foreach ((array) data_get($composer, 'autoload.psr-4') as $namespace => $path) {
             foreach ((array) $path as $pathChoice) {
